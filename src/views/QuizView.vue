@@ -9,9 +9,9 @@
         <h3 class="question-text">{{ question.title }}</h3>
 
         <div v-for="(choice, idx) in [question.choice0, question.choice1, question.choice2, question.choice3]" :key="'choice-' + idx" class="choice">
-          <input type="radio" :id="'option' + idx" v-model="answers[index]" :value="choice" 
+          <input type="radio" :id="'option' + idx + '-' + index" v-model="answers[index]" :value="choice" 
             :name="'question' + index" class="option-input" />
-          <label :for="'option' + idx" class="option-label">{{ choice }}</label>
+          <label :for="'option' + idx + '-' + index" class="option-label">{{ choice }}</label>
         </div>
 
         <!-- 选择题评估反馈 -->
@@ -60,7 +60,7 @@ export default {
     const correctAnswers = ref([]); // 存储所有选择题正确答案
     const correctFillAnswers = ref([]); // 存储所有填空题正确答案
     const token = sessionStorage.getItem('token'); // 从 session 中获取 token
-    const apiUrl = getCurrentInstance().appContext.config.globalProperties.$apiUrl
+    const apiUrl = getCurrentInstance().appContext.config.globalProperties.$apiUrl;
 
     // 获取选择题
     const getChooseQuestions = async () => {
@@ -156,24 +156,28 @@ export default {
 <style scoped>
 /* 基本容器样式 */
 .quiz-container {
-  width: 80%;
-  max-width: 800px;
+  width: 90%;
+  max-width: 1000px;
   margin: 40px auto;
   padding: 40px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #f8f9fa, #eceff1);
+  border-radius: 15px;
+  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 标题样式 */
 .quiz-title {
-  font-size: 32px;
+  font-size: 36px;
   color: #2c3e50;
   text-align: center;
   margin-bottom: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* 说明文字 */
 .quiz-description {
   text-align: center;
   font-size: 18px;
@@ -185,75 +189,105 @@ export default {
 .quiz-form {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 40px;
 }
 
 /* 题目卡片 */
 .question-card {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.question-card:hover {
+  transform: translateY(-5px);
 }
 
 /* 题目文本 */
 .question-text {
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 500;
   color: #2c3e50;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  line-height: 1.5;
 }
 
 /* 选项样式 */
 .choice {
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .option-input {
-  margin-right: 10px;
+  margin-right: 12px;
+  width: 24px;
+  height: 24px;
+  accent-color: #4CAF50;
 }
 
 .option-label {
-  font-size: 16px;
+  font-size: 18px;
   color: #34495e;
+  transition: color 0.3s ease;
 }
 
-/* 输入框样式 */
+.choice:hover .option-label {
+  color: #4CAF50;
+}
+
+/* 填空输入框 */
 .answer-input {
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 16px;
+  font-size: 18px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
   width: 100%;
-  margin-top: 10px;
+  max-width: 500px;
+  background-color: #fafafa;
+  margin-top: 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.answer-input:focus {
+  border-color: #4CAF50;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
 }
 
 /* 提交按钮样式 */
 .submit-btn {
-  padding: 15px;
+  padding: 18px 40px;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 18px;
-  transition: background-color 0.3s ease;
-  align-self: center;
+  font-size: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .submit-btn:hover {
   background-color: #45a049;
 }
 
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
 /* 反馈样式 */
 .feedback {
   margin-top: 20px;
-  font-size: 16px;
+  font-size: 18px;
   color: #34495e;
 }
 
 .answer-chosen {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .correct-answer {
@@ -261,20 +295,26 @@ export default {
 }
 
 .explanation {
-  font-size: 14px;
+  font-size: 16px;
   color: #7f8c8d;
 }
 
 /* 响应式设计 */
 @media (max-width: 600px) {
   .quiz-container {
-    padding: 20px;
+    padding: 25px;
   }
+
   .question-text {
+    font-size: 20px;
+  }
+
+  .submit-btn {
     font-size: 18px;
   }
-  .submit-btn {
-    font-size: 16px;
+
+  .answer-input {
+    max-width: 100%;
   }
 }
 </style>

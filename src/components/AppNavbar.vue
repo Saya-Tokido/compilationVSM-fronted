@@ -5,9 +5,9 @@
     </div>
     <div class="navbar-center">
       <ul class="navbar-links">
-        <li><router-link to="/experiment" class="navbar-link">实验介绍</router-link></li>
-        <li><router-link to="/quiz" class="navbar-link">选择填空</router-link></li>
-        <li><router-link to="/problems" class="navbar-link">程序编译</router-link></li>
+        <li><router-link to="/experiment" class="navbar-link" active-class="active-link">实验介绍</router-link></li>
+        <li><router-link to="/quiz" class="navbar-link" active-class="active-link">选择填空</router-link></li>
+        <li><router-link to="/problems" class="navbar-link" active-class="active-link">程序编译</router-link></li>
       </ul>
     </div>
     <button class="logout-btn" @click="logout">退出</button>
@@ -101,6 +101,17 @@ export default {
 
 .navbar-link:hover::after {
   background-color: #FFD700; /* 鼠标悬停时的下划线 */
+}
+
+/* 当前活动链接的样式 */
+.navbar-link.active-link {
+  color: #FFD700; /* 当前活动链接的文字颜色 */
+  font-weight: bold;
+}
+
+.navbar-link.active-link::after {
+  background-color: #FFD700; /* 当前活动链接的下划线颜色 */
+  height: 3px; /* 更粗的下划线 */
 }
 
 /* 退出按钮样式 */

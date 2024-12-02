@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from './views/LoginView.vue';
 import ExperimentIntroView from './views/ExperimentIntroView.vue';
 import QuizView from './views/QuizView.vue';
-// import CompilerView from './views/CompilerView.vue';
+import CompilerView from './views/CompilerView.vue';
 import ProblemList from './views/ProblemList.vue';
 
 const routes = [
@@ -32,12 +32,12 @@ const routes = [
     path: '/problems',
     name: 'problems',
     component: ProblemList
+  },
+  {
+    path: '/compiler/:problemId',
+    name: 'compilerView',
+    component: CompilerView
   }
-  // {
-  //   path: '/compiler/:problemId',
-  //   name: 'compilerView',
-  //   component: CompilerView
-  // }
 ];
 
 const router = createRouter({
