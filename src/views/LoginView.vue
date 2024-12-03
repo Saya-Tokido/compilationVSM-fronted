@@ -2,7 +2,7 @@
   <div class="login-container">
     <!-- 系统标题 -->
     <div class="system-title">
-      <h1>编译原理虚拟仿真系统</h1>
+      <h1>编译原理实验系统</h1>
     </div>
 
     <!-- 登录表单 -->
