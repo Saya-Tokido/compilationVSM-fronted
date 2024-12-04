@@ -13,7 +13,7 @@
           <p class="problem-info"><strong>难度：</strong>{{ problem.level }}</p>
           <p class="problem-info"><strong>提交次数：</strong>{{ problem.commitNum }}</p>
           <p class="problem-info"><strong>通过率：</strong>{{ problem.passPercent }}</p>
-          <router-link :to="{ name: 'compilerView', params: { problemId: problem.id } }" class="start-btn">
+          <router-link :to="{ name: 'MethodCompilerView', params: { problemId: problem.id } }" class="start-btn">
             开始编程
           </router-link>
         </div>

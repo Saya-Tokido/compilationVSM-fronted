@@ -7,7 +7,8 @@
       <ul class="navbar-links">
         <li><router-link to="/experiment" class="navbar-link" active-class="active-link">实验介绍</router-link></li>
         <li><router-link to="/quiz" class="navbar-link" active-class="active-link">选择填空</router-link></li>
-        <li><router-link to="/problems" class="navbar-link" active-class="active-link">程序编译</router-link></li>
+        <li><router-link to="/problems" class="navbar-link" active-class="active-link">函数编译</router-link></li>
+        <li><router-link to="/lexer_compiler" class="navbar-link" active-class="active-link">词法分析器编译</router-link></li>
       </ul>
     </div>
     <button class="logout-btn" @click="logout">退出</button>

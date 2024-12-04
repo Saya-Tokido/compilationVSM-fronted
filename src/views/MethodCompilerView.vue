@@ -1,5 +1,5 @@
 <template>
-  <div class="compiler-view">
+  <div class="method-compiler-view">
     <h1>{{ problem.title || '题目' }}</h1>
 
     <!-- 题目详细信息展示 -->
@@ -16,13 +16,7 @@
 
     <!-- 代码编辑框，显示初始函数体 -->
     <div class="editor">
-      <textarea
-        v-model="code"
-        rows="15"
-        cols="80"
-        placeholder="输入 C/C++ 程序代码..."
-        class="code-editor"
-      ></textarea>
+      <textarea v-model="code" rows="15" cols="80" placeholder="输入 C/C++ 程序代码..." class="code-editor"></textarea>
     </div>
 
     <!-- 编译按钮 -->
@@ -46,7 +40,7 @@ import axios from 'axios';
 import { useRoute } from 'vue-router';
 
 export default {
-  name: 'CompilerView',
+  name: 'MethodCompilerView',
   setup() {
     const code = ref('');
     const output = ref({ message: '', type: '' });  // 新增类型字段，用于设置输出结果类型（成功、错误等）
@@ -90,7 +84,7 @@ export default {
       loading.value = true;
       try {
         const headers = { 'token': token };
-        const response = await axios.post(apiUrl + `/master/question/method_body/check/${problemId}`, { code: code.value }, { headers });
+        const response = await axios.post(apiUrl + `/master/question/method_body/check`, { problemId: problemId,code: code.value }, { headers });
 
         const result = response.data.data;
         if (result.status === 0) {
@@ -124,7 +118,7 @@ export default {
 
 <style scoped>
 /* 整体容器 */
-.compiler-view {
+.method-compiler-view {
   max-width: 1000px;
   margin: 30px auto;
   padding: 25px;
@@ -135,7 +129,7 @@ export default {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.compiler-view:hover {
+.method-compiler-view:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
 }
@@ -263,13 +257,18 @@ h3 {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .compiler-view {
+  .method-compiler-view {
     padding: 15px;
   }
 

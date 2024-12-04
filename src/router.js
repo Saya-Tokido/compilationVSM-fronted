@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from './views/LoginView.vue';
 import ExperimentIntroView from './views/ExperimentIntroView.vue';
 import QuizView from './views/QuizView.vue';
-import CompilerView from './views/CompilerView.vue';
+import MethodCompilerView from './views/MethodCompilerView.vue';
+import LexerCompilerView from './views/LexerCompilerView.vue';
 import ProblemList from './views/ProblemList.vue';
 
 const routes = [
@@ -34,9 +35,14 @@ const routes = [
     component: ProblemList
   },
   {
-    path: '/compiler/:problemId',
-    name: 'compilerView',
-    component: CompilerView
+    path: '/method_compiler/:problemId',
+    name: 'MethodCompilerView',
+    component: MethodCompilerView
+  },
+  {
+    path: '/lexer_compiler',
+    name: 'LexerCompilerView',
+    component: LexerCompilerView
   }
 ];
 
