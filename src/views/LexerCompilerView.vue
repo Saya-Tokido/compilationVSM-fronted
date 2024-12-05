@@ -2,6 +2,23 @@
     <div class="lexer-compiler-view">
         <h1>{{ problem.title || '词法分析器题目' }}</h1>
 
+        <!-- 语言选择框 -->
+        <div class="language-select">
+            <label for="compLanguage">选择编译目标语言:</label>
+            <select v-model="compLanguage" id="compLanguage">
+                <option v-for="(item, index) in languageOptions.compLanguage" :key="index" :value="item">
+                    {{ item }}
+                </option>
+            </select>
+
+            <label for="language">选择编程语言:</label>
+            <select v-model="language" id="language">
+                <option v-for="(item, index) in languageOptions.languageList" :key="index" :value="item">
+                    {{ item }}
+                </option>
+            </select>
+        </div>
+
         <!-- 题目详细信息展示 -->
         <div v-if="problem.description" class="problem-details">
             <p><strong>题目描述：</strong>{{ problem.description }}</p>
@@ -9,14 +26,14 @@
             <p><strong>输出示例：</strong>{{ problem.terminalOutput }}</p>
         </div>
 
-        <!-- 代码编辑框，显示初始代码 -->
+        <!-- 代码编辑框 -->
         <div class="editor">
             <textarea v-model="code" rows="15" cols="80" placeholder="输入 C/C++ 程序代码..." class="code-editor"></textarea>
         </div>
 
         <!-- 编译按钮 -->
         <div class="compile-btn-container">
-            <button @click="compileCode" class="compile-btn">
+            <button @click="compileCode" class="compile-btn" :disabled="loading || !language || !compLanguage">
                 <span v-if="loading" class="spinner"></span> 编译
             </button>
         </div>
@@ -30,7 +47,7 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance, watch } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -44,13 +61,41 @@ export default {
         const token = sessionStorage.getItem('token');
         const apiUrl = getCurrentInstance().appContext.config.globalProperties.$apiUrl;
 
+        const compLanguage = ref('PL0'); // Default compilation language
+        const language = ref('C++'); // Default programming language
+
+        const languageOptions = ref({
+            compLanguage: ['PL0'], // Default to 'PL0'
+            languageList: ['C++'], // Default to 'C++'
+        });
+
+        // 获取可选语言列表
+        const fetchLanguages = async () => {
+            const headers = { 'token': token };
+            try {
+                const response = await axios.get(apiUrl + '/master/question/lexer/language', { headers });
+                if (response.data.code === 0) {
+                    const data = response.data.data;
+                    languageOptions.value = {
+                        compLanguage: data.languageMaps.map(item => item.compLanguage),
+                        languageList: data.languageMaps
+                            .find(item => item.compLanguage === compLanguage.value)?.languageList || ['C++']
+                    };
+                }
+            } catch (error) {
+                console.error('获取语言列表失败', error);
+            }
+        };
+
         // 获取题目示例数据
         const fetchProblemDetails = async () => {
+            if (!language.value || !compLanguage.value) return; // Ensure both languages are selected
+
             try {
                 const headers = { 'token': token };
                 const response = await axios.post(`${apiUrl}/master/question/lexer`, {
-                    language: 'C++',
-                    compLanguage: 'PL0'
+                    language: language.value,
+                    compLanguage: compLanguage.value
                 }, { headers });
 
                 if (response.data.code === 0) {
@@ -83,9 +128,7 @@ export default {
                 const result = response.data.data;
                 if (result.status === 0) {
                     output.value = { message: result.message, type: 'success' };
-                } else if (result.status === 1) {
-                    output.value = { message: result.message, type: 'error' };
-                } else if (result.status === 2) {
+                } else if (result.status === 1 || result.status === 2) {
                     output.value = { message: result.message, type: 'error' };
                 }
             } catch (error) {
@@ -96,14 +139,25 @@ export default {
             }
         };
 
-        // 页面加载时获取题目数据
-        onMounted(fetchProblemDetails);
+        // 页面加载时获取语言列表和题目数据
+        onMounted(() => {
+            fetchLanguages();
+            fetchProblemDetails();
+        });
+
+        // Watchers to refetch problem details when language or compLanguage changes
+        watch([compLanguage, language], () => {
+            fetchProblemDetails();
+        });
 
         return {
             code,
             output,
             problem,
             lexerId,
+            compLanguage,
+            language,
+            languageOptions,
             compileCode,
             loading
         };
@@ -112,6 +166,8 @@ export default {
 </script>
 
 <style scoped>
+/* 保留原有样式 */
+
 /* 整体容器 */
 .lexer-compiler-view {
     max-width: 1000px;
@@ -137,6 +193,34 @@ h1 {
     margin-bottom: 20px;
     text-align: center;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 语言选择框样式 */
+.language-select {
+    margin: 20px 0;
+    font-size: 1.2rem;
+}
+
+.language-select label {
+    margin-right: 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.language-select select {
+    font-size: 1.1rem;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-right: 15px;
+    background-color: #fff;
+    color: #333;
+}
+
+.language-select select:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
 }
 
 /* 题目详细信息 */
@@ -179,105 +263,75 @@ h1 {
 /* 编译按钮 */
 .compile-btn-container {
     text-align: center;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
 .compile-btn {
-    padding: 12px 35px;
-    font-size: 1.3rem;
-    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    background-color: #4CAF50;
     color: white;
+    font-size: 1.2rem;
+    padding: 12px 24px;
     border: none;
-    border-radius: 50px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease, transform 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.compile-btn:hover {
-    background: linear-gradient(45deg, #66bb6a, #388e3c);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
+.compile-btn:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
 }
 
-.compile-btn:focus {
-    outline: none;
+.compile-btn:hover:not(:disabled) {
+    background-color: #45a049;
+    transform: translateY(-3px);
 }
 
-/* 编译结果 */
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4CAF50;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 编译结果展示 */
 .output-container {
     margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #ddd;
 }
 
-h3 {
-    font-size: 1.7rem;
-    font-weight: 600;
-    color: #333;
+.output-container h3 {
+    font-size: 1.5rem;
     margin-bottom: 15px;
 }
 
 .output {
-    background-color: #f4f8fc;
-    padding: 20px;
-    border-radius: 10px;
-    font-size: 1.2rem;
-    color: #333;
-    word-wrap: break-word;
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    border-radius: 8px;
     white-space: pre-wrap;
-    box-sizing: border-box;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    word-wrap: break-word;
 }
 
 .output.success {
-    background-color: #dff0d8;
-    color: #3c763d;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
 }
 
 .output.error {
-    background-color: #f2dede;
-    color: #a94442;
-}
-
-/* 加载动画 */
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4CAF50;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    animation: spin 1s linear infinite;
-    margin-right: 10px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .lexer-compiler-view {
-        padding: 15px;
-    }
-
-    h1 {
-        font-size: 2rem;
-    }
-
-    .code-editor {
-        font-size: 1rem;
-    }
-
-    .compile-btn {
-        font-size: 1.1rem;
-        padding: 10px 30px;
-    }
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 </style>
