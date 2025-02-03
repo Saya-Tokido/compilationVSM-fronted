@@ -35,7 +35,7 @@
     </div>
 
     <div class="start-experiment">
-      <router-link to="/quiz" class="start-btn">开始选择填空实验</router-link>
+      <router-link to="/student/quiz" class="start-btn">开始选择填空实验</router-link>
     </div>
   </div>
 </template>

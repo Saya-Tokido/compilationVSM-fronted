@@ -20,14 +20,16 @@
         </div>
 
         <!-- 题目详细信息展示 -->
-        <div v-if="problem.description" class="problem-details">
+        <div v-if="problem.description" class="problem-details card">
             <p><strong>题目描述：</strong>{{ problem.description }}</p>
-            <p><strong>输入示例：</strong>{{ problem.terminalInput }}</p>
-            <p><strong>输出示例：</strong>{{ problem.terminalOutput }}</p>
+            <p><strong>输入示例：</strong></p>
+            <p v-html="formattedInput"></p>
+            <p><strong>输出示例：</strong></p>
+            <p v-html="formattedOutput"></p>
         </div>
 
         <!-- 代码编辑框 -->
-        <div class="editor">
+        <div class="editor card">
             <textarea v-model="code" rows="15" cols="80" placeholder="输入 C/C++ 程序代码..." class="code-editor"></textarea>
         </div>
 
@@ -39,7 +41,7 @@
         </div>
 
         <!-- 编译结果展示 -->
-        <div v-if="output" class="output-container">
+        <div v-if="output" class="output-container card">
             <h3>编译结果：</h3>
             <pre class="output" :class="output.type">{{ output.message }}</pre>
         </div>
@@ -47,7 +49,7 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance, watch } from 'vue';
+import { ref, computed, onMounted, getCurrentInstance, watch } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -69,11 +71,21 @@ export default {
             languageList: ['C++'], // Default to 'C++'
         });
 
+        // Format the input and output with proper line breaks (replacing \r\n and \n with <br>)
+        const formatText = (text) => {
+            if (!text) return '';
+            // Replace \r\n and \n with <br> for proper rendering of line breaks
+            return text.replace(/(\r\n|\n)/g, '<br>');
+        };
+
+        const formattedInput = computed(() => formatText(problem.value.terminalInput));
+        const formattedOutput = computed(() => formatText(problem.value.terminalOutput));
+
         // 获取可选语言列表
         const fetchLanguages = async () => {
-            const headers = { 'token': token };
+            const headers = { token };
             try {
-                const response = await axios.get(apiUrl + '/master/question/lexer/language', { headers });
+                const response = await axios.get(apiUrl + '/student/oj/lexer/language', { headers });
                 if (response.data.code === 0) {
                     const data = response.data.data;
                     languageOptions.value = {
@@ -92,8 +104,8 @@ export default {
             if (!language.value || !compLanguage.value) return; // Ensure both languages are selected
 
             try {
-                const headers = { 'token': token };
-                const response = await axios.post(`${apiUrl}/master/question/lexer`, {
+                const headers = { token };
+                const response = await axios.post(`${apiUrl}/student/oj/lexer/demo`, {
                     language: language.value,
                     compLanguage: compLanguage.value
                 }, { headers });
@@ -115,12 +127,31 @@ export default {
             }
         };
 
+        // 获取上次提交的代码
+        const fetchLastCommitCode = async () => {
+            if (!lexerId.value) return; // 确保 lexerId 存在
+
+            try {
+                const headers = { token };
+                const response = await axios.get(`${apiUrl}/student/oj/lexer/last-commit/${lexerId.value}`, { headers });
+
+                if (response.data.code === 0) {
+                    // 将代码列表拼接为字符串，并赋值给 code
+                    code.value = response.data.data.code.join('\n');
+                } else {
+                    console.error('获取上次提交代码失败:', response.data.message);
+                }
+            } catch (error) {
+                console.error('获取上次提交代码失败', error);
+            }
+        };
+
         // 编译代码并提交判题
         const compileCode = async () => {
             loading.value = true;
             try {
-                const headers = { 'token': token };
-                const response = await axios.post(`${apiUrl}/master/question/lexer/check`, {
+                const headers = { token };
+                const response = await axios.post(`${apiUrl}/student/oj/lexer/check`, {
                     problemId: lexerId.value,
                     code: code.value
                 }, { headers });
@@ -140,14 +171,17 @@ export default {
         };
 
         // 页面加载时获取语言列表和题目数据
-        onMounted(() => {
-            fetchLanguages();
-            fetchProblemDetails();
+        onMounted(async () => {
+            await fetchLanguages();
+            await fetchProblemDetails();
+            await fetchLastCommitCode(); // 获取上次提交的代码
         });
 
-        // Watchers to refetch problem details when language or compLanguage changes
+        // Watchers to refetch problem details and last commit code when language or compLanguage changes
         watch([compLanguage, language], () => {
-            fetchProblemDetails();
+            fetchProblemDetails().then(() => {
+                fetchLastCommitCode(); // 重新获取上次提交的代码
+            });
         });
 
         return {
@@ -158,6 +192,8 @@ export default {
             compLanguage,
             language,
             languageOptions,
+            formattedInput,
+            formattedOutput,
             compileCode,
             loading
         };
@@ -166,8 +202,6 @@ export default {
 </script>
 
 <style scoped>
-/* 保留原有样式 */
-
 /* 整体容器 */
 .lexer-compiler-view {
     max-width: 1000px;
@@ -195,14 +229,31 @@ h1 {
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* 卡片样式 */
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
 /* 语言选择框样式 */
 .language-select {
     margin: 20px 0;
     font-size: 1.2rem;
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
 .language-select label {
-    margin-right: 10px;
     font-weight: 600;
     color: #333;
 }
@@ -212,9 +263,9 @@ h1 {
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #ddd;
-    margin-right: 15px;
     background-color: #fff;
     color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .language-select select:focus {
@@ -237,11 +288,7 @@ h1 {
 }
 
 /* 代码编辑框 */
-.editor {
-    margin: 30px 0;
-}
-
-.code-editor {
+.editor textarea {
     width: 100%;
     padding: 18px;
     font-family: 'Courier New', Courier, monospace;
@@ -254,7 +301,7 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.code-editor:focus {
+.editor textarea:focus {
     border-color: #4CAF50;
     outline: none;
     box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
@@ -304,10 +351,6 @@ h1 {
 /* 编译结果展示 */
 .output-container {
     margin-top: 30px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    border: 1px solid #ddd;
 }
 
 .output-container h3 {

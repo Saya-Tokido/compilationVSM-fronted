@@ -5,10 +5,25 @@
     </div>
     <div class="navbar-center">
       <ul class="navbar-links">
-        <li><router-link to="/experiment" class="navbar-link" active-class="active-link">实验介绍</router-link></li>
-        <li><router-link to="/quiz" class="navbar-link" active-class="active-link">选择填空</router-link></li>
-        <li><router-link to="/problems" class="navbar-link" active-class="active-link">函数编译</router-link></li>
-        <li><router-link to="/lexer_compiler" class="navbar-link" active-class="active-link">词法分析器编译</router-link></li>
+        <!-- 根据角色动态显示链接 -->
+        <li v-if="role === '1'">
+          <router-link to="/student/experiment" class="navbar-link" active-class="active-link">实验介绍</router-link>
+        </li>
+        <li v-if="role === '1'">
+          <router-link to="/student/quiz" class="navbar-link" active-class="active-link">客观题</router-link>
+        </li>
+        <li v-if="role === '1'">
+          <router-link to="/student/lexer-compiler" class="navbar-link" active-class="active-link">词法分析题编译</router-link>
+        </li>
+        <li v-if="role === '2'">
+          <router-link to="/teacher/student-management" class="navbar-link" active-class="active-link">学生信息管理</router-link>
+        </li>
+        <li v-if="role === '2'">
+          <router-link to="/teacher/obj-review" class="navbar-link" active-class="active-link">学生客观题答题情况</router-link>
+        </li>
+        <li v-if="role === '3'">
+          <router-link to="/admin/account-management" class="navbar-link" active-class="active-link">账号管理</router-link>
+        </li>
       </ul>
     </div>
     <button class="logout-btn" @click="logout">退出</button>
@@ -16,14 +31,44 @@
 </template>
 
 <script>
+import { ref, onMounted,getCurrentInstance } from 'vue';
+import axios from 'axios';
+
 export default {
   name: 'AppNavbar',
-  methods: {
-    logout() {
-      // 清除 sessionStorage 中的 token
-      sessionStorage.removeItem('token');
-      this.$router.push('/');
-    }
+  setup() {
+    const role = ref(sessionStorage.getItem('role') || 'guest'); // 默认为 guest
+    let apiUrl = '';// 用于存储 API 地址
+
+    // 在 mounted 钩子中初始化 apiUrl
+    onMounted(() => {
+      const instance = getCurrentInstance();
+      if (instance) {
+        apiUrl = instance.appContext.config.globalProperties.$apiUrl;
+      }
+    });
+
+    const logout = async () => {
+      try {
+        await axios.get(`${apiUrl}/logout`, {
+          headers: {
+            token: sessionStorage.getItem('token') // 携带 token
+          }
+        });
+          // 清除 sessionStorage 中的 token 和 role
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('role');
+          window.location.href = '/'; // 跳转到首页
+      } catch (error) {
+        console.error('登出失败', error);
+        alert('登出失败，请稍后重试！');
+      }
+    };
+
+    return {
+      role,
+      logout
+    };
   }
 }
 </script>
@@ -55,6 +100,11 @@ export default {
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo h1:hover {
+  transform: scale(1.05); /* 悬浮放大效果 */
 }
 
 /* 中间菜单 */

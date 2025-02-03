@@ -28,7 +28,7 @@ import { ref } from 'vue'
 import md5 from 'js-md5'  // 导入 md5 加密库
 import axios from 'axios'
 import { useRouter } from 'vue-router'  // 导入 useRouter
-import { getCurrentInstance} from 'vue'
+import { getCurrentInstance } from 'vue'
 
 export default {
   name: 'LoginView',
@@ -43,7 +43,7 @@ export default {
         // 在将密码发送到后端之前进行 MD5 加密
         const encryptedPassword = md5(password.value)
         // 发送 POST 请求到后端，密码是加密后的
-        const response = await axios.post(apiUrl+'/login', {
+        const response = await axios.post(apiUrl + '/login', {
           userName: username.value,
           password: encryptedPassword
         })
@@ -52,11 +52,12 @@ export default {
         if (0 == response.data.code) {
           // 将 token 存储到 sessionStorage
           sessionStorage.setItem('token', response.data.data.token)
-          // 登录成功后跳转到实验介绍页面
-          router.push('/experiment')  // 使用 router.push() 进行跳转
+          sessionStorage.setItem('role', response.data.data.roleId)
+
+          router.push({ name: "Home" })  // 使用 router.push() 进行跳转
         } else {
           // 登录失败
-          errorMessage.value = '登录失败，请检查用户名和密码。'
+          errorMessage.value = response.data.message
         }
       } catch (error) {
         // 捕获请求错误
