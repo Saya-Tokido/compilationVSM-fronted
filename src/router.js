@@ -8,6 +8,7 @@ import ProblemList from './views/ProblemList.vue';
 import AccountManagement from './views/admin/AccountManagement.vue';
 import StudentManagement from './views/teacher/StudentManagement.vue';
 import ObjReview from './views/teacher/ObjReview.vue';
+import LexerReview from './views/teacher/LexerReview.vue';
 
 const routes = [
   {
@@ -74,6 +75,12 @@ const routes = [
     path: '/teacher/obj-review',
     name: 'ObjReview',
     component: ObjReview,
+    meta: { requiresAuth: true, role: '2' }
+  },
+  {
+    path: '/teacher/lexer-review',
+    name: 'LexerReview',
+    component: LexerReview,
     meta: { requiresAuth: true, role: '2' }
   },
   {

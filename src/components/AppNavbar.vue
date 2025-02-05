@@ -21,6 +21,9 @@
         <li v-if="role === '2'">
           <router-link to="/teacher/obj-review" class="navbar-link" active-class="active-link">学生客观题答题情况</router-link>
         </li>
+        <li v-if="role === '2'">
+          <router-link to="/teacher/lexer-review" class="navbar-link" active-class="active-link">学生词法分析器题答题情况</router-link>
+        </li>
         <li v-if="role === '3'">
           <router-link to="/admin/account-management" class="navbar-link" active-class="active-link">账号管理</router-link>
         </li>
