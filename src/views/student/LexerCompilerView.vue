@@ -54,7 +54,7 @@ import axios from 'axios';
 
 export default {
     name: 'LexerCompilerView',
-    setup() {
+    setup(props, { emit }) {
         const code = ref('');
         const output = ref({ message: '', type: '' });
         const problem = ref({});
@@ -93,6 +93,8 @@ export default {
                         languageList: data.languageMaps
                             .find(item => item.compLanguage === compLanguage.value)?.languageList || ['C++']
                     };
+                } else {
+                    emit('trigger-error', response.data.message);
                 }
             } catch (error) {
                 console.error('获取语言列表失败', error);
@@ -120,10 +122,10 @@ export default {
                     };
                     lexerId.value = data.lexerId;
                 } else {
-                    console.error('获取题目失败:', response.data.message);
+                    emit('trigger-error', response.data.message);
                 }
             } catch (error) {
-                console.error('获取题目数据失败', error);
+                emit('trigger-error', '获取题目数据失败');
             }
         };
 
@@ -137,12 +139,12 @@ export default {
 
                 if (response.data.code === 0) {
                     // 将代码列表拼接为字符串，并赋值给 code
-                    code.value = response.data.data.code.join('\n');
+                    code.value = response.data.data?.code.join('\n');
                 } else {
-                    console.error('获取上次提交代码失败:', response.data.message);
+                    emit('trigger-error', response.data.message);
                 }
             } catch (error) {
-                console.error('获取上次提交代码失败', error);
+                emit('trigger-error', '获取上次提交代码失败');
             }
         };
 
@@ -155,15 +157,18 @@ export default {
                     problemId: lexerId.value,
                     code: code.value
                 }, { headers });
-
-                const result = response.data.data;
-                if (result.status === 0) {
-                    output.value = { message: result.message, type: 'success' };
-                } else if (result.status === 1 || result.status === 2) {
-                    output.value = { message: result.message, type: 'error' };
+                if (response.data.code == 0) {
+                    const result = response.data.data;
+                    if (result.status === 0) {
+                        output.value = { message: result.message, type: 'success' };
+                    } else if (result.status === 1 || result.status === 2) {
+                        output.value = { message: result.message, type: 'error' };
+                    }
+                } else {
+                    emit('trigger-error', response.data.message);
                 }
+
             } catch (error) {
-                console.error('编译代码失败', error);
                 output.value = { message: '编译失败，请检查代码！', type: 'error' };
             } finally {
                 loading.value = false;
@@ -344,8 +349,13 @@ h1 {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* 编译结果展示 */

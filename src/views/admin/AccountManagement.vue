@@ -111,7 +111,7 @@
                             <input 
                                 id="teachClass" 
                                 v-model="teacherForm.teachClassInput" 
-                                placeholder="请输入教学班，按回车键添加" 
+                                placeholder="请输入教学班，按回车键添加，不要带空格" 
                                 @keydown.enter.prevent="addTeachClass" 
                                 class="tag-input" 
                             />
@@ -144,7 +144,7 @@ import axios from 'axios';
 
 export default {
     name: 'AccountManagement',
-    setup() {
+    setup(props,{emit}) {
         // 当前激活的功能标签
         const activeTab = ref('addStudent');
         const token = sessionStorage.getItem('token');
@@ -223,7 +223,7 @@ export default {
                     };
                     formSubmitted.value = false;
                 } else {
-                    alert(response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (error) {
                 console.error('添加学生账号时出错:', error);
@@ -273,11 +273,10 @@ export default {
                     };
                     formSubmitted.value = false;
                 } else {
-                    alert(response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (error) {
-                console.error('添加教师账号时出错:', error);
-                alert('添加教师账号时出错，请稍后重试');
+                emit('trigger-error','添加教师账号时出错，请稍后重试');
             }
         };
 

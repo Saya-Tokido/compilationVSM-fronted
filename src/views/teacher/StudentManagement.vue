@@ -92,7 +92,7 @@ import { ref, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 
 export default {
-    setup() {
+    setup(props,{emit}) {
         const studentInfoList = ref([]);
         const classList = ref([]);
         const totalPages = ref(1);
@@ -137,10 +137,10 @@ export default {
                     totalPages.value = response.data.data.totalPages;
                     totalRecords.value = response.data.data.totalRecords;
                 } else {
-                    console.error('获取学生信息失败:', response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (error) {
-                console.error('获取学生信息失败', error);
+                emit('trigger-error','获取学生信息失败');
             }
         };
 

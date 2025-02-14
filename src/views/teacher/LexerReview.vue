@@ -71,7 +71,7 @@ import { ref, watch, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 
 export default {
-    setup() {
+    setup(props,{emit}) {
         // 响应式数据
         const languageMaps = ref([{ compLanguage: '', language: '' }]); // 确保初始化为空数组
         const selectedCompLanguage = ref(''); // 选择的编译语言
@@ -108,10 +108,10 @@ export default {
                 if (response.data.code == 0) {
                     languageMaps.value = response.data.data.languageMaps || [{ compLanguage: '', language: '' }]; // 确保是一个数组
                 } else {
-                    alert(response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (error) {
-                console.error('获取编程语言列表失败:', error);
+                emit('trigger-error','获取编程语言列表失败');
             }
         });
 
@@ -124,10 +124,10 @@ export default {
                     if (response.data.code == 0) {
                         problem.value = response.data.data;
                     } else {
-                        alert(response.data.message);
+                        emit('trigger-error',response.data.message);
                     }
                 } catch (error) {
-                    console.error('获取题目失败:', error);
+                    emit('trigger-error','获取题目失败');
                 }
             }
         };
@@ -135,7 +135,7 @@ export default {
         // 获取学生作答情况
         const fetchStudentAnswer = async () => {
             if (!studentNumber.value) {
-                alert('请输入学生学号');
+                emit('trigger-error','请输入学生学号');
                 return;
             }
 
@@ -155,11 +155,10 @@ export default {
                             alert('没有找到该学生的作答信息');
                         }
                     } else {
-                        alert(response.data.message);
+                        emit('trigger-error',response.data.message);
                     }
                 } catch (error) {
-                    console.error('获取学生作答失败:', error);
-                    alert('获取学生作答数据时发生错误，请稍后重试');
+                    emit('trigger-error','获取学生作答数据时发生错误，请稍后重试');
                 }
             }
         };

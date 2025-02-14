@@ -1,6 +1,7 @@
 import { createApp, ref, onMounted } from 'vue'
 import App from './App.vue'
 import router from './router'
+import ErrorDialog from './components/ErrorDialog.vue'
 
 const app = createApp(App)
 
@@ -14,8 +15,17 @@ onMounted(() => {
     isAuthenticated.value = true
   }
 })
-app.config.globalProperties.$apiUrl = 'http://192.168.1.5:607/api'
+app.config.globalProperties.$apiUrl = 'http://192.168.1.2:607/api'
 // 使用 provide 把登录状态共享给所有组件
 app.provide('isAuthenticated', isAuthenticated)
+app.component('ErrorDialog', ErrorDialog);
+
+// // 注册全局方法 showError
+// app.config.globalProperties.$showError = function (message) {
+//   const errorDialog = app.config.globalProperties.$errorDialog;
+//   if (errorDialog) {
+//     errorDialog.showDialog(message);  // 调用 ErrorDialog 的 showDialog 方法
+//   }
+// };
 
 app.use(router).mount('#app')

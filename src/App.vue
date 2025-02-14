@@ -3,10 +3,11 @@
     <!-- 页面导航栏，排除登录页面 -->
     <AppNavbar v-if="!isLoginPage" />
 
-    <!-- 页面内容区域 -->
+    <!-- 错误提示组件 -->
+    <ErrorDialog ref="errorDialog" />
     <div class="main-content">
       <!-- 动态加载页面组件 -->
-      <router-view />
+      <router-view @trigger-error="triggerError" />
     </div>
 
     <!-- 浮动聊天框 -->
@@ -15,19 +16,22 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AppNavbar from './components/AppNavbar.vue'
 import FloatingChat from './components/FloatingChat.vue'
+import ErrorDialog from './components/ErrorDialog.vue'
 
 export default {
   name: 'App',
   components: {
     AppNavbar,
-    FloatingChat
+    FloatingChat,
+    ErrorDialog
   },
   setup() {
     const route = useRoute()
+    const errorDialog = ref(null); // 创建 ref
 
     // 判断当前是否是登录页面
     const isLoginPage = computed(() => {
@@ -35,8 +39,17 @@ export default {
       return name === 'LoginView'
     })
 
+    const triggerError = (errorMessage) => {
+      if (errorDialog.value) {
+        errorDialog.value.showDialog(errorMessage); // 通过 ref 访问子组件方法
+      }
+    };
+
+
     return {
-      isLoginPage
+      isLoginPage,
+      triggerError,
+      errorDialog
     }
   }
 }
@@ -56,13 +69,17 @@ export default {
 
 /* 页面主要内容区域，占满整个屏幕 */
 .main-content {
-  flex: 1; /* 占满剩余空间 */
+  position: relative;
+  z-index: 9;
+  flex: 1;
+  /* 占满剩余空间 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 20px;
-  overflow-y: auto; /* 确保内容过多时可以滚动 */
+  overflow-y: auto;
+  /* 确保内容过多时可以滚动 */
 }
 
 /* 如果不是登录页面，应用导航栏 */
@@ -80,13 +97,15 @@ AppNavbar {
 router-view {
   width: 100%;
   max-width: 1200px;
-  margin-top: 80px; /* 为了避免导航栏遮挡内容 */
+  margin-top: 80px;
+  /* 为了避免导航栏遮挡内容 */
   padding: 20px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  overflow: auto; /* 让内容可以滚动 */
+  overflow: auto;
+  /* 让内容可以滚动 */
 }
 
 /* 浮动聊天窗口 */
@@ -110,6 +129,7 @@ router-view {
 }
 
 @media (max-width: 768px) {
+
   /* 小屏幕下，内容区域和导航栏调整 */
   #app {
     padding: 10px;
@@ -120,7 +140,8 @@ router-view {
   }
 
   router-view {
-    margin-top: 60px; /* 确保导航栏不会遮挡 */
+    margin-top: 60px;
+    /* 确保导航栏不会遮挡 */
     width: 100%;
     padding: 15px;
     box-shadow: none;

@@ -16,25 +16,40 @@
           <router-link to="/student/lexer-compiler" class="navbar-link" active-class="active-link">词法分析题编译</router-link>
         </li>
         <li v-if="role === '2'">
-          <router-link to="/teacher/student-management" class="navbar-link" active-class="active-link">学生信息管理</router-link>
+          <router-link to="/teacher/student-management" class="navbar-link"
+            active-class="active-link">学生信息管理</router-link>
         </li>
         <li v-if="role === '2'">
           <router-link to="/teacher/obj-review" class="navbar-link" active-class="active-link">学生客观题答题情况</router-link>
         </li>
         <li v-if="role === '2'">
-          <router-link to="/teacher/lexer-review" class="navbar-link" active-class="active-link">学生词法分析器题答题情况</router-link>
+          <router-link to="/teacher/lexer-review" class="navbar-link"
+            active-class="active-link">学生词法分析器题答题情况</router-link>
+          <!-- 二级菜单 -->
+          <ul class="dropdown-menu">
+            <li>
+              <router-link to="/teacher/lexer-review/info" class="navbar-link">学生答题情况</router-link>
+            </li>
+            <li>
+              <router-link to="/teacher/lexer-review/code-pd" class="navbar-link">代码查重管理</router-link>
+            </li>
+          </ul>
         </li>
         <li v-if="role === '3'">
           <router-link to="/admin/account-management" class="navbar-link" active-class="active-link">账号管理</router-link>
         </li>
       </ul>
     </div>
-    <button class="logout-btn" @click="logout">退出</button>
+    <div class="navbar-actions">
+      <!-- 个人中心 -->
+      <router-link to="/profile" class="profile-link">个人中心</router-link>
+      <button class="logout-btn" @click="logout">退出</button>
+    </div>
   </nav>
 </template>
 
 <script>
-import { ref, onMounted,getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -58,13 +73,12 @@ export default {
             token: sessionStorage.getItem('token') // 携带 token
           }
         });
-          // 清除 sessionStorage 中的 token 和 role
-          sessionStorage.removeItem('token');
-          sessionStorage.removeItem('role');
-          window.location.href = '/'; // 跳转到首页
+        // 清除 sessionStorage 中的 token 和 role
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('role');
+        window.location.href = '/'; // 跳转到首页
       } catch (error) {
-        console.error('登出失败', error);
-        alert('登出失败，请稍后重试！');
+        alert("登出失败");
       }
     };
 
@@ -79,18 +93,23 @@ export default {
 <style scoped>
 /* Navbar 基本样式 */
 .navbar {
-  background: linear-gradient(135deg, #45aaf2, #34d8eb, #4caf50); /* 渐变背景 */
+  background: linear-gradient(135deg, #45aaf2, #34d8eb, #4caf50);
+  /* 渐变背景 */
   color: white;
   padding: 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
-  border-radius: 25px; /* 圆角 */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* 更深的阴影 */
+  border-radius: 25px;
+  /* 圆角 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  /* 更深的阴影 */
   z-index: 10;
-  backdrop-filter: blur(8px); /* 背景模糊效果 */
-  -webkit-backdrop-filter: blur(8px); /* Safari 支持 */
+  backdrop-filter: blur(8px);
+  /* 背景模糊效果 */
+  -webkit-backdrop-filter: blur(8px);
+  /* Safari 支持 */
   transition: all 0.3s ease;
 }
 
@@ -107,14 +126,17 @@ export default {
 }
 
 .navbar-logo h1:hover {
-  transform: scale(1.05); /* 悬浮放大效果 */
+  transform: scale(1.05);
+  /* 悬浮放大效果 */
 }
 
 /* 中间菜单 */
 .navbar-center {
   display: flex;
-  justify-content: flex-start;  /* 将菜单项放置到右边 */
-  flex-grow: 1; /* 使菜单容器占据剩余空间 */
+  justify-content: flex-start;
+  /* 将菜单项放置到右边 */
+  flex-grow: 1;
+  /* 使菜单容器占据剩余空间 */
 }
 
 .navbar-links {
@@ -123,6 +145,7 @@ export default {
   align-items: center;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
 .navbar-link {
@@ -148,24 +171,65 @@ export default {
 }
 
 .navbar-link:hover {
-  color: #FFD700; /* 鼠标悬停时的颜色 */
-  background-color: rgba(255, 255, 255, 0.1); /* 鼠标悬停时的背景色 */
-  transform: translateY(-5px); /* 小的悬浮效果 */
+  color: #FFD700;
+  /* 鼠标悬停时的颜色 */
+  background-color: rgba(255, 255, 255, 0.1);
+  /* 鼠标悬停时的背景色 */
+  transform: translateY(-5px);
+  /* 小的悬浮效果 */
 }
 
 .navbar-link:hover::after {
-  background-color: #FFD700; /* 鼠标悬停时的下划线 */
+  background-color: #FFD700;
+  /* 鼠标悬停时的下划线 */
 }
 
 /* 当前活动链接的样式 */
 .navbar-link.active-link {
-  color: #FFD700; /* 当前活动链接的文字颜色 */
+  color: #FFD700;
+  /* 当前活动链接的文字颜色 */
   font-weight: bold;
 }
 
 .navbar-link.active-link::after {
-  background-color: #FFD700; /* 当前活动链接的下划线颜色 */
-  height: 3px; /* 更粗的下划线 */
+  background-color: #FFD700;
+  /* 当前活动链接的下划线颜色 */
+  height: 3px;
+  /* 更粗的下划线 */
+}
+
+/* 下拉菜单样式 */
+.navbar-links>li {
+  position: relative;
+  /* 需要为父元素设置 position: relative; */
+}
+
+.navbar-links .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.9);
+  /* 更明亮的背景 */
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 20;
+  /* 确保下拉菜单在其他内容上方 */
+}
+
+.navbar-links>li:hover .dropdown-menu {
+  display: block;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #333;
+  /* 深色字体以增加对比度 */
+  padding: 10px;
+  display: block;
+}
+
+.navbar-link:hover {
+  color: #FFD700;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 退出按钮样式 */
@@ -197,6 +261,25 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
+/* 个人页面链接样式 */
+.profile-link {
+  text-decoration: none;
+  color: #4CAF50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 50px;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  margin-right: 85px;
+}
+
+.profile-link:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+  color: #FFD700;
+  transform: translateY(-3px);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .navbar {
@@ -225,6 +308,13 @@ export default {
     margin-top: 20px;
     width: 100%;
     font-size: 14px;
+  }
+
+  .navbar-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
   }
 }
 </style>

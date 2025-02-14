@@ -20,20 +20,13 @@
         </div>
 
         <div class="questions-grid">
-          <div v-for="(question, index) in chooseQuestions" 
-               :key="'mcq-' + index" 
-               class="question-card animated-card">
+          <div v-for="(question, index) in chooseQuestions" :key="'mcq-' + index" class="question-card animated-card">
             <h3 class="question-text">{{ question.title }}</h3>
 
             <div v-for="(choice, idx) in [question.choice0, question.choice1, question.choice2, question.choice3]"
-                 :key="'choice-' + idx" 
-                 class="choice">
-              <input type="radio" 
-                     :id="'option' + idx + '-' + index" 
-                     v-model="answers[index]" 
-                     :value="choice"
-                     :name="'question' + index" 
-                     class="option-input" />
+              :key="'choice-' + idx" class="choice">
+              <input type="radio" :id="'option' + idx + '-' + index" v-model="answers[index]" :value="choice"
+                :name="'question' + index" class="option-input" />
               <label :for="'option' + idx + '-' + index" class="option-label">{{ choice }}</label>
             </div>
 
@@ -55,14 +48,10 @@
         </div>
 
         <div class="questions-grid">
-          <div v-for="(question, index) in fillQuestions" 
-               :key="'fib-' + index" 
-               class="question-card animated-card">
+          <div v-for="(question, index) in fillQuestions" :key="'fib-' + index" class="question-card animated-card">
             <h3 class="question-text">{{ question.title }}</h3>
-            <input type="text" 
-                   v-model="answers[chooseQuestions.length + index]" 
-                   class="answer-input"
-                   placeholder="请输入答案" />
+            <input type="text" v-model="answers[chooseQuestions.length + index]" class="answer-input"
+              placeholder="请输入答案" />
 
             <!-- 反馈区域 -->
             <div v-if="submitted" class="feedback" :data-correct="isFillCorrect[index]">
@@ -77,9 +66,7 @@
 
     <!-- 粘性提交按钮 -->
     <div class="sticky-submit">
-      <button type="submit" 
-              class="submit-btn animated-card"
-              @click.prevent="submitQuiz">
+      <button type="submit" class="submit-btn animated-card" @click.prevent="submitQuiz">
         <span class="button-text">提交答案</span>
         <span class="button-icon">🚀</span>
       </button>
@@ -94,7 +81,7 @@ import { getCurrentInstance } from 'vue';
 
 export default {
   name: 'QuizView',
-  setup() {
+  setup(props, { emit }) {
     // 响应式数据
     const answers = ref([]);
     const submitted = ref(false);
@@ -110,7 +97,7 @@ export default {
     // 模式相关状态
     const modeText = ref('');
     const modeClass = ref('');
-    const modeIcon = computed(() => 
+    const modeIcon = computed(() =>
       modeClass.value === 'practice-mode' ? '📘' : '📝'
     );
 
@@ -133,27 +120,26 @@ export default {
           // 初始化题目数据
           chooseQuestions.value = response.data.data.chooseList || [];
           fillQuestions.value = response.data.data.fillList || [];
-          
+
           // 初始化答案数组
           answers.value = new Array(
-            chooseQuestions.value.length + 
+            chooseQuestions.value.length +
             fillQuestions.value.length
           ).fill('');
 
           // 设置模式状态
           const isPractice = response.data.data.practise === 1;
-          modeText.value = isPractice 
-            ? '练习模式，不计分' 
+          modeText.value = isPractice
+            ? '练习模式，不计分'
             : '测验模式，认真对待';
-          modeClass.value = isPractice 
-            ? 'practice-mode' 
+          modeClass.value = isPractice
+            ? 'practice-mode'
             : 'test-mode';
         } else {
-          alert(`获取题目失败：${response.data.message}`);
+          emit('trigger-error', response.data.message);
         }
       } catch (error) {
-        console.error('题目加载失败:', error);
-        alert('题目加载失败，请检查网络连接');
+        emit('trigger-error', '题目加载失败，请检查网络连接');
       }
     };
 
@@ -199,11 +185,10 @@ export default {
           modeClass.value = 'practice-mode';
 
         } else {
-          alert(`答案校验失败：${data.message}`);
+          emit('trigger-error', data.message);
         }
       } catch (error) {
-        console.error('提交失败:', error);
-        alert('答案提交失败，请稍后重试');
+        emit('trigger-error', '答案提交失败，请稍后重试');
       }
     };
 
@@ -265,6 +250,7 @@ export default {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

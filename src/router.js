@@ -9,6 +9,8 @@ import AccountManagement from './views/admin/AccountManagement.vue';
 import StudentManagement from './views/teacher/StudentManagement.vue';
 import ObjReview from './views/teacher/ObjReview.vue';
 import LexerReview from './views/teacher/LexerReview.vue';
+import Profile from './views/ProfileView.vue';
+import LexerCodePlagiarism from './views/teacher/LexerCodePlagiarism.vue';
 
 const routes = [
   {
@@ -84,10 +86,28 @@ const routes = [
     meta: { requiresAuth: true, role: '2' }
   },
   {
+    path: '/teacher/lexer-review/info',
+    name: 'LexerReviewInfo',
+    component: LexerReview,
+    meta: { requiresAuth: true, role: '2' }
+  },
+  {
+    path: '/teacher/lexer-review/code-pd',
+    name: 'LexerCodePlagiarism',
+    component: LexerCodePlagiarism,
+    meta: { requiresAuth: true, role: '2' }
+  },
+  {
     path: '/admin/account-management',
     name: 'AccountManagement',
     component: AccountManagement,
     meta: { requiresAuth: true, role: '3' }
+  },
+  {
+    path: '/profile',
+    component: Profile,
+    name: 'Profile',
+    meta: { requiresAuth: true }
   }
 ];
 

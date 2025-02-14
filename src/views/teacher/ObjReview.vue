@@ -83,7 +83,7 @@ import axios from 'axios';
 
 export default {
     name: 'ObjReview',
-    setup() {
+    setup(props,{emit}) {
         const studentNumber = ref('');
         const studentData = ref({
             baseInfo: {},
@@ -113,7 +113,7 @@ export default {
                 if (response.data.code == 0) {
                     studentData.value = response.data.data;
                 } else {
-                    alert(response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (err) {
                 error.value = '获取数据失败，请稍后重试';
@@ -147,7 +147,7 @@ export default {
                     adjustedScore.value = ''; // 清空输入框
                     showScoreAdjustModal.value = false; // 关闭弹框
                 } else {
-                    alert(response.data.message);
+                    emit('trigger-error',response.data.message);
                 }
             } catch (err) {
                 error.value = '调整成绩失败，请稍后重试';
