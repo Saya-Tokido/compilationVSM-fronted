@@ -5,8 +5,9 @@
             <thead>
                 <tr>
                     <th>教学班</th>
-                    <th>高查重率代码个数</th>
-                    <th>操作</th>
+                    <th>高查重率代码对数</th>
+                    <th>查重</th>
+                    <th>导出抄袭数据</th> <!-- 新增导出按钮列 -->
                 </tr>
             </thead>
             <tbody>
@@ -14,13 +15,16 @@
                     <td>{{ item.teachClass }}</td>
                     <td>{{ item.plagiarismNum }}</td>
                     <td>
-                        <button
-                            :disabled="item.isTaskSubmitted"
-                            @click="startPlagiarismCheck(item.teachClass, index)"
-                            :class="{'submitted': item.isTaskSubmitted}">
+                        <button :disabled="item.isTaskSubmitted" @click="startPlagiarismCheck(item.teachClass, index)"
+                            :class="{ 'submitted': item.isTaskSubmitted }">
                             {{ item.isTaskSubmitted ? '已提交查重任务' : '开始查重' }}
                         </button>
                     </td>
+                    <td>
+                        <button @click="exportPlagiarismData(item.teachClass)">
+                            导出抄袭数据
+                        </button>
+                    </td> <!-- 导出按钮 -->
                 </tr>
             </tbody>
         </table>
@@ -36,6 +40,7 @@
         </div>
     </div>
 </template>
+
 <script>
 import { ref, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
@@ -48,11 +53,11 @@ export default {
         const token = sessionStorage.getItem('token');
         const headers = { 'token': token };
         let apiUrl = '';
-        
+
         // Modal相关状态
         const showModal = ref(false);
         const expectedPlagiarismNum = ref(0);
-        
+
         // 获取数据的函数
         const fetchData = async () => {
             try {
@@ -70,7 +75,7 @@ export default {
         // 开始查重的函数
         const startPlagiarismCheck = async (teachClass, index) => {
             try {
-                const response = await axios.post(`${apiUrl}/teacher/oj-review/pd/execute`, {'teachClass':teachClass}, { headers });
+                const response = await axios.post(`${apiUrl}/teacher/oj-review/pd/execute`, { 'teachClass': teachClass }, { headers });
                 if (response.data.code === 0) {
                     // 成功时，弹窗显示，并更新按钮状态
                     expectedPlagiarismNum.value = response.data.data;
@@ -81,6 +86,40 @@ export default {
                 }
             } catch (error) {
                 errorMessage.value = '查重任务提交失败，请稍后再试！';
+            }
+        };
+
+        // 导出抄袭数据的函数
+        const exportPlagiarismData = async (teachClass) => {
+            try {
+                const response = await axios.post(`${apiUrl}/teacher/oj-review/pd/export`, { 'teachClass': teachClass }, {
+                    headers,
+                    responseType: 'blob'  // 重要，表示响应是一个二进制文件
+                });
+
+                // 获取文件名（从响应头中提取）
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = teachClass+'词法分析器代码抄袭数据.xlsx';  // 默认文件名
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    const regex = /filename="(.+)"/;
+                    const matches = regex.exec(disposition);
+                    if (matches && matches[1]) {
+                        filename = matches[1];  // 获取文件名
+                    }
+                }
+
+                // 创建下载链接
+                const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;  // 使用提取的文件名
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);  // 清理URL对象
+            } catch (error) {
+                emit('trigger-error', '导出数据失败，请稍后再试！');
             }
         };
 
@@ -104,11 +143,13 @@ export default {
             startPlagiarismCheck,
             showModal,
             closeModal,
-            expectedPlagiarismNum
+            expectedPlagiarismNum,
+            exportPlagiarismData  // 新方法
         };
     }
 };
 </script>
+
 <style scoped>
 .lexer-code-plagiarism {
     max-width: 800px;

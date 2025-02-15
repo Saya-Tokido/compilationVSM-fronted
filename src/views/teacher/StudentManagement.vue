@@ -73,8 +73,8 @@
                     <td>{{ student.name }}</td>
                     <td>{{ student.adminClass }}</td>
                     <td>{{ student.teachClass }}</td>
-                    <td>{{ student.objGrade }}</td>
-                    <td>{{ student.lexerGrade }}</td>
+                    <td>{{ student.objScore }}</td>
+                    <td>{{ student.lexerScore }}</td>
                 </tr>
             </tbody>
         </table>
