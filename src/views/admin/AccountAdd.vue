@@ -1,6 +1,6 @@
 <template>
-    <div class="admin-account-management">
-        <h1>账号管理</h1>
+    <div class="admin-account-add">
+        <h1>账号添加</h1>
         <div class="function-nav">
             <button v-for="tab in tabs" :key="tab.id" :class="['nav-button', { 'active': activeTab === tab.id }]"
                 @click="activeTab = tab.id">
@@ -109,7 +109,7 @@ import { ref, getCurrentInstance, watch } from 'vue';
 import axios from 'axios';
 
 export default {
-    name: 'AccountManagement',
+    name: 'AccountAdd',
     setup(props, { emit }) {
         const activeTab = ref('addStudent');
         const token = sessionStorage.getItem('token');
@@ -403,7 +403,7 @@ export default {
 }
 
 /* 页面布局和整体设计 */
-.admin-account-management {
+.admin-account-add {
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;

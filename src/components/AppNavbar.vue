@@ -36,7 +36,10 @@
           </ul>
         </li>
         <li v-if="role === '3'">
-          <router-link to="/admin/account-management" class="navbar-link" active-class="active-link">账号管理</router-link>
+          <router-link to="/admin/account-add" class="navbar-link" active-class="active-link">账号添加</router-link>
+        </li>
+        <li v-if="role === '3'">
+          <router-link to="/admin/account-manage" class="navbar-link" active-class="active-link">账号管理</router-link>
         </li>
       </ul>
     </div>

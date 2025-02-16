@@ -5,12 +5,13 @@ import QuizView from './views/student/QuizView.vue';
 import MethodCompilerView from './views/MethodCompilerView.vue';
 import LexerCompilerView from './views/student/LexerCompilerView.vue';
 import ProblemList from './views/ProblemList.vue';
-import AccountManagement from './views/admin/AccountManagement.vue';
+import AccountAdd from './views/admin/AccountAdd.vue';
 import StudentManagement from './views/teacher/StudentManagement.vue';
 import ObjReview from './views/teacher/ObjReview.vue';
 import LexerReview from './views/teacher/LexerReview.vue';
 import Profile from './views/ProfileView.vue';
 import LexerCodePlagiarism from './views/teacher/LexerCodePlagiarism.vue';
+import AccountManage from './views/admin/AccountManage.vue';
 
 const routes = [
   {
@@ -25,7 +26,7 @@ const routes = [
       } else if (role === '2') {
         return { name: 'StudentManagement' };
       } else if (role === '3') {
-        return { name: 'AccountManagement' };
+        return { name: 'AccountAdd' };
       } else {
         return { name: 'LoginView' };  // 未登录或无角色，跳转登录页
       }
@@ -98,9 +99,15 @@ const routes = [
     meta: { requiresAuth: true, role: '2' }
   },
   {
-    path: '/admin/account-management',
-    name: 'AccountManagement',
-    component: AccountManagement,
+    path: '/admin/account-add',
+    name: 'AccountAdd',
+    component: AccountAdd,
+    meta: { requiresAuth: true, role: '3' }
+  },
+  {
+    path: '/admin/account-manage',
+    name: 'AccountManage',
+    component: AccountManage,
     meta: { requiresAuth: true, role: '3' }
   },
   {
