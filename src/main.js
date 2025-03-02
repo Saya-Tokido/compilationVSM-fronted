@@ -15,7 +15,7 @@ onMounted(() => {
     isAuthenticated.value = true
   }
 })
-app.config.globalProperties.$apiUrl = 'http://192.168.1.2:607/api'
+app.config.globalProperties.$apiUrl = 'http://192.168.0.3:607/api'
 // 使用 provide 把登录状态共享给所有组件
 app.provide('isAuthenticated', isAuthenticated)
 app.component('ErrorDialog', ErrorDialog);
