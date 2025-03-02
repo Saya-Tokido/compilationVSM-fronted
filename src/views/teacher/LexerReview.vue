@@ -152,7 +152,7 @@ export default {
                             studentAnswer.value = response.data.data;
                         } else {
                             studentAnswer.value = null;
-                            alert('没有找到该学生的作答信息');
+                            emit('trigger-error','没有找到该学生的作答信息');
                         }
                     } else {
                         emit('trigger-error',response.data.message);

@@ -162,7 +162,7 @@ export default {
                 if (response.data.code === 0) {
                     // 删除成功后，移除该题目信息
                     chooseList.value = chooseList.value.filter(choose => choose.id !== id);
-                    alert('删除成功');
+                    emit('trigger-info', '删除成功');
                 } else {
                     emit('trigger-error', response.data.message);
                 }
@@ -226,7 +226,7 @@ export default {
                 if (response.data.code === 0) {
                     // 删除成功后，移除该题目信息
                     fillList.value = fillList.value.filter(fill => fill.id !== id);
-                    alert('删除成功');
+                    emit('trigger-info', '删除成功');
                 } else {
                     emit('trigger-error', response.data.message);
                 }

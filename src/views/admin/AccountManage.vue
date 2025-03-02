@@ -145,7 +145,7 @@ export default {
                 if (response.data.code === 0) {
                     // 删除成功后，移除该学生信息
                     studentInfoList.value = studentInfoList.value.filter(student => student.number !== number);
-                    alert('删除成功');
+                    emit('trigger-info', '删除成功');
                 } else {
                     emit('trigger-error', response.data.message);
                 }
@@ -167,7 +167,7 @@ export default {
                 const response = await axios.post(`${apiUrl}/admin/account/delete-teacher`, { number: teacherId.value }, { headers });
 
                 if (response.data.code === 0) {
-                    alert("删除成功");
+                    emit('trigger-info', '删除成功');
                     teacherId.value = ''; // 清空输入框
                 } else {
                     emit('trigger-error', response.data.message);

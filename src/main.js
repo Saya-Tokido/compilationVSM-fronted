@@ -2,6 +2,7 @@ import { createApp, ref, onMounted } from 'vue'
 import App from './App.vue'
 import router from './router'
 import ErrorDialog from './components/ErrorDialog.vue'
+import InfoDialog from './components/InfoDialog.vue'
 
 const app = createApp(App)
 
@@ -19,6 +20,7 @@ app.config.globalProperties.$apiUrl = 'http://192.168.0.3:607/api'
 // 使用 provide 把登录状态共享给所有组件
 app.provide('isAuthenticated', isAuthenticated)
 app.component('ErrorDialog', ErrorDialog);
+app.component('InfoDialog',InfoDialog);
 
 // // 注册全局方法 showError
 // app.config.globalProperties.$showError = function (message) {

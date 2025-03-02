@@ -5,9 +5,10 @@
 
     <!-- 错误提示组件 -->
     <ErrorDialog ref="errorDialog" />
+    <InfoDialog ref="infoDialog"/>
     <div class="main-content">
       <!-- 动态加载页面组件 -->
-      <router-view @trigger-error="triggerError" />
+      <router-view @trigger-error="triggerError" @trigger-info="triggerInfo"/>
     </div>
 
     <!-- 浮动聊天框 -->
@@ -21,17 +22,20 @@ import { useRoute } from 'vue-router'
 import AppNavbar from './components/AppNavbar.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ErrorDialog from './components/ErrorDialog.vue'
+import InfoDialog from './components/InfoDialog.vue'
 
 export default {
   name: 'App',
   components: {
     AppNavbar,
     FloatingChat,
-    ErrorDialog
+    ErrorDialog,
+    InfoDialog
   },
   setup() {
     const route = useRoute()
-    const errorDialog = ref(null); // 创建 ref
+    const errorDialog = ref(null);
+    const infoDialog = ref(null);
 
     // 判断当前是否是登录页面
     const isLoginPage = computed(() => {
@@ -45,11 +49,19 @@ export default {
       }
     };
 
+    const triggerInfo = (infoMessage) => {
+      if (infoDialog.value) {
+        infoDialog.value.showDialog(infoMessage); // 通过 ref 访问子组件方法
+      }
+    };
+
 
     return {
       isLoginPage,
       triggerError,
-      errorDialog
+      triggerInfo,
+      errorDialog,
+      infoDialog
     }
   }
 }

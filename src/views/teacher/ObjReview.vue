@@ -142,7 +142,7 @@ export default {
                 );
 
                 if (response.data.code == 0) {
-                    alert('成绩调整成功');
+                    emit('trigger-info', '成绩调整成功');
                     fetchStudentData();
                     adjustedScore.value = ''; // 清空输入框
                     showScoreAdjustModal.value = false; // 关闭弹框
