@@ -12,6 +12,7 @@ import LexerReview from './views/teacher/LexerReview.vue';
 import Profile from './views/ProfileView.vue';
 import LexerCodePlagiarism from './views/teacher/LexerCodePlagiarism.vue';
 import AccountManage from './views/admin/AccountManage.vue';
+import QuestionBank from './views/teacher/QuestionBank.vue';
 
 const routes = [
   {
@@ -96,6 +97,12 @@ const routes = [
     path: '/teacher/lexer-review/code-pd',
     name: 'LexerCodePlagiarism',
     component: LexerCodePlagiarism,
+    meta: { requiresAuth: true, role: '2' }
+  },
+  {
+    path: '/teacher/question-bank',
+    name: 'QuestionBank',
+    component: QuestionBank,
     meta: { requiresAuth: true, role: '2' }
   },
   {

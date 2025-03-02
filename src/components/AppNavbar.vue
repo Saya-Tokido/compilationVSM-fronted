@@ -15,6 +15,7 @@
         <li v-if="role === '1'">
           <router-link to="/student/lexer-compiler" class="navbar-link" active-class="active-link">词法分析题编译</router-link>
         </li>
+
         <li v-if="role === '2'">
           <router-link to="/teacher/student-management" class="navbar-link"
             active-class="active-link">学生信息管理</router-link>
@@ -35,6 +36,10 @@
             </li>
           </ul>
         </li>
+        <li v-if="role === '2'">
+          <router-link to="/teacher/question-bank" class="navbar-link" active-class="active-link">题库管理</router-link>
+        </li>
+
         <li v-if="role === '3'">
           <router-link to="/admin/account-add" class="navbar-link" active-class="active-link">账号添加</router-link>
         </li>
