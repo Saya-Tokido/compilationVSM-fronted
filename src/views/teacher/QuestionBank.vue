@@ -54,6 +54,19 @@
                 <button @click="chooseNextPage" :disabled="chooseCurrentPage === chooseTotalPages"
                     class="btn">下一页</button>
             </div>
+
+
+            <!-- 新增选择题表单 -->
+            <div class="add-question-form">
+                <h3>新增选择题</h3>
+                <input v-model="newChoose.title" placeholder="题目" class="input" />
+                <input v-model="newChoose.choice0" placeholder="选项A" class="input" />
+                <input v-model="newChoose.choice1" placeholder="选项B" class="input" />
+                <input v-model="newChoose.choice2" placeholder="选项C" class="input" />
+                <input v-model="newChoose.choice3" placeholder="选项D" class="input" />
+                <input v-model="newChoose.keyAnswer" placeholder="标准答案" class="input" />
+                <button @click="addChoose" class="btn primary">添加</button>
+            </div>
         </div>
 
         <!-- 填空题题库管理 -->
@@ -91,6 +104,16 @@
                 <span class="page-info">第 {{ fillCurrentPage }} 页 / 共 {{ fillTotalPages }} 页</span>
                 <button @click="fillNextPage" :disabled="fillCurrentPage === fillTotalPages" class="btn">下一页</button>
             </div>
+
+
+            <!-- 新增填空题表单 -->
+            <div class="add-question-form">
+                <h3>新增填空题</h3>
+                <input v-model="newFill.title" placeholder="题目" class="input" />
+                <input v-model="newFill.keyAnswer" placeholder="标准答案" class="input" />
+                <button @click="addFill" class="btn primary">添加</button>
+            </div>
+
         </div>
     </div>
 </template>
@@ -250,6 +273,58 @@ export default {
             }
         };
 
+        // 新增选择题的表单数据
+        const newChoose = ref({
+            title: '',
+            choice0: '',
+            choice1: '',
+            choice2: '',
+            choice3: '',
+            keyAnswer: ''
+        });
+
+        // 新增填空题的表单数据
+        const newFill = ref({
+            title: '',
+            keyAnswer: ''
+        });
+
+        // 添加选择题
+        const addChoose = async () => {
+            const headers = { token };
+            try {
+                const response = await axios.post(`${apiUrl}/teacher/question-bank/choose-add`, newChoose.value, { headers });
+
+                if (response.data.code === 0) {
+                    emit('trigger-info', '添加成功');
+                    fetchChoose(); // 重新获取选择题列表
+                    newChoose.value = { title: '', choice0: '', choice1: '', choice2: '', choice3: '', keyAnswer: '' }; // 清空表单
+                } else {
+                    emit('trigger-error', response.data.message);
+                }
+            } catch (error) {
+                emit('trigger-error', '添加选择题失败');
+            }
+        };
+
+        // 添加填空题
+        const addFill = async () => {
+            const headers = { token };
+            try {
+                const response = await axios.post(`${apiUrl}/teacher/question-bank/fill-add`, newFill.value, { headers });
+
+                if (response.data.code === 0) {
+                    emit('trigger-info', '添加成功');
+                    fetchFill(); // 重新获取填空题列表
+                    newFill.value = { title: '', keyAnswer: '' }; // 清空表单
+                } else {
+                    emit('trigger-error', response.data.message);
+                }
+            } catch (error) {
+                emit('trigger-error', '添加填空题失败');
+            }
+        };
+
 
 
         onMounted(() => {
@@ -276,7 +351,11 @@ export default {
             fetchFill,
             deleteFill,
             fillPrevPage,
-            fillNextPage
+            fillNextPage,
+            newChoose,
+            newFill,
+            addChoose,
+            addFill
         };
     }
 };
@@ -423,5 +502,68 @@ export default {
 
 .btn:disabled:hover {
     background-color: #ccc;
+}
+
+.add-question-form {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-question-form h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.add-question-form .input {
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.add-question-form .input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.upload-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upload-section h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.upload-section input[type="file"] {
+    margin-bottom: 10px;
+}
+
+.upload-section .btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+}
+
+.upload-section .btn:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
 }
 </style>
