@@ -8,6 +8,9 @@
             <button @click="activeTab = 'fill'" :class="['tab-button', { active: activeTab === 'fill' }]">
                 填空题题库管理
             </button>
+            <button @click="activeTab = 'lexer'" :class="['tab-button', { active: activeTab === 'lexer' }]">
+                词法分析器题题库管理
+            </button>
         </div>
 
         <!-- 选择题题库管理 -->
@@ -21,7 +24,7 @@
                 </div>
             </div>
 
-            <table class="obj-table">
+            <table class="page-table">
                 <thead>
                     <tr>
                         <th>题目</th>
@@ -80,7 +83,7 @@
                 </div>
             </div>
 
-            <table class="obj-table">
+            <table class="page-table">
                 <thead>
                     <tr>
                         <th>题目</th>
@@ -112,6 +115,70 @@
                 <input v-model="newFill.title" placeholder="题目" class="input" />
                 <input v-model="newFill.keyAnswer" placeholder="标准答案" class="input" />
                 <button @click="addFill" class="btn primary">添加</button>
+            </div>
+
+        </div>
+
+        <!-- 词法分析器题题库管理 -->
+        <div v-if="activeTab === 'lexer'" class="lexer-bank">
+            <div class="filters">
+                <div class="filter-group-inline">
+                    <input v-model="lexerFilters.language" placeholder="编程语言" class="input" />
+                </div>
+                <div class="filter-group-inline">
+                    <input v-model="lexerFilters.compLanguage" placeholder="待编译语言" class="input" />
+                </div>
+                <div class="filter-group-inline">
+                    <input v-model="lexerFilters.description" placeholder="题目描述(支持全模糊)" class="input" />
+                </div>
+                <div class="filter-group-inline">
+                    <button @click="fetchLexer" class="btn primary">查询</button>
+                </div>
+            </div>
+
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <th>编程语言</th>
+                        <th>待编程语言</th>
+                        <th>题目描述</th>
+                        <th>提交次数</th>
+                        <th>通过次数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="lexer in lexerList" :key="lexer.id">
+                        <td>{{ lexer.language }}</td>
+                        <td>{{ lexer.compLanguage }}</td>
+                        <td>{{ lexer.description }}</td>
+                        <td>{{ lexer.commitNum }}</td>
+                        <td>{{ lexer.passNum }}</td>
+                        <td>
+                            <button @click="lexerDetail(lexer.id)" class="btn primary">详情</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <button @click="lexerPrevPage" :disabled="lexerCurrentPage === 1" class="btn">上一页</button>
+                <span class="page-info">第 {{ lexerCurrentPage }} 页 / 共 {{ lexerTotalPages }} 页</span>
+                <button @click="lexerNextPage" :disabled="lexerCurrentPage === lexerTotalPages" class="btn">下一页</button>
+            </div>
+
+
+            <!-- 保存词法分析器题表单 -->
+            <div class="add-question-form">
+                <h3>新增/编辑词法分析器题</h3>
+                <!--跳转词法分析器时显示id，新增时不显示，只有显示才能查询用例-->
+                <label>词法分析器题id {{ newLexer.id }}</label>
+                <input v-model="newLexer.language" placeholder="编程语言" class="input" />
+                <input v-model="newLexer.compLanguage" placeholder="待编译语言" class="input" />
+                <input v-model="newLexer.description" placeholder="题目描述" class="input" />
+                <input v-model="newLexer.terminalInput" placeholder="测试用例终端输入" class="input" />
+                <input v-model="newLexer.terminalOutput" placeholder="测试用例终端输出" class="input" />
+                <button @click="saveLexer" class="btn primary">保存</button>
             </div>
 
         </div>
@@ -325,11 +392,95 @@ export default {
             }
         };
 
+        // 词法分析器题获取
+        const lexerList = ref([]);
+        const lexerTotalPages = ref(1);
+        const lexerCurrentPage = ref(1);
+        const lexerTotalRecords = ref(0);
+
+        const lexerFilters = ref({
+            language: '',
+            compLanguage: '',
+            description: ''
+        });
+
+        const fetchLexer = async () => {
+            const headers = { token };
+            const requestData = {
+                ...lexerFilters.value,
+                pageIndex: lexerCurrentPage.value,
+                pageSize: 10
+            };
+
+            Object.keys(requestData).forEach(key => {
+                if (requestData[key] === '' || (Array.isArray(requestData[key]) && requestData[key].length === 0)) {
+                    delete requestData[key];
+                }
+            });
+
+            try {
+                const response = await axios.post(`${apiUrl}/teacher/question-bank/lexer-page`, requestData, { headers });
+
+                if (response.data.code === 0) {
+                    lexerList.value = response.data.data.lexerList;
+                    lexerTotalPages.value = response.data.data.totalPages;
+                    lexerTotalRecords.value = response.data.data.totalRecords;
+                } else {
+                    emit('trigger-error', response.data.message);
+                }
+            } catch (error) {
+                emit('trigger-error', '获取词法分析题题库失败');
+            }
+        };
+
+        // 词法分析器题分页
+        const lexerNextPage = () => {
+            if (lexerCurrentPage.value < lexerTotalPages.value) {
+                lexerCurrentPage.value++;
+                fetchLexer();
+            }
+        };
+
+        const lexerPrevPage = () => {
+            if (lexerCurrentPage.value > 1) {
+                lexerCurrentPage.value--;
+                fetchLexer();
+            }
+        };
+
+        // 新增词法分析器题的表单数据
+        const newLexer = ref({
+            language: '',
+            compLanguage: '',
+            description: '',
+            terminalInput: '',
+            terminalOutput: ''
+        });
+
+        // 保存词法分析器题
+        const saveLexer = async () => {
+            const headers = { token };
+            try {
+                const response = await axios.post(`${apiUrl}/teacher/question-bank/lexer-add`, newLexer.value, { headers });
+
+                if (response.data.code === 0) {
+                    emit('trigger-info', '添加成功');
+                    fetchLexer();
+                    newLexer.value = { id: '', language: '', compLanguage: '', description: '', terminalInput: '', terminalOutput: '' }; // 清空表单
+                } else {
+                    emit('trigger-error', response.data.message);
+                }
+            } catch (error) {
+                emit('trigger-error', '添加词法分析器题失败');
+            }
+        };
+
 
 
         onMounted(() => {
             fetchChoose();
             fetchFill();
+            fetchLexer();
         });
 
         return {
@@ -355,7 +506,18 @@ export default {
             newChoose,
             newFill,
             addChoose,
-            addFill
+            addFill,
+            // 词法分析器题
+            lexerFilters,
+            lexerNextPage,
+            lexerPrevPage,
+            lexerCurrentPage,
+            lexerTotalPages,
+            lexerTotalRecords,
+            newLexer,
+            saveLexer,
+            lexerList,
+            fetchLexer
         };
     }
 };
@@ -451,7 +613,7 @@ export default {
     transform: translateY(-1px);
 }
 
-.obj-table {
+.page-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
@@ -461,24 +623,24 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.obj-table th,
-.obj-table td {
+.page-table th,
+.page-table td {
     padding: 12px;
     border: 1px solid #ddd;
     text-align: left;
 }
 
-.obj-table th {
+.page-table th {
     background-color: #4CAF50;
     color: white;
     font-weight: bold;
 }
 
-.obj-table tr:nth-child(even) {
+.page-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-.obj-table tr:hover {
+.page-table tr:hover {
     background-color: #f1f1f1;
 }
 
